@@ -171,6 +171,65 @@ SearchResult* rabinKarpMatcher(SearchRequest* request)
 	return result;
 }
 
+SearchResult *knuthMorrisPrattMatcher(SearchRequest *request) {
+
+    SearchResult *result;
+    int *prefix_mass, i = 1, j = 0;
+
+    clock_t start, finish;
+
+    start = clock();
+
+    result = (SearchResult *) malloc(sizeof(SearchResult));
+    result->matchedShifts = (int *) calloc(request->text->haystackSize, sizeof(int));
+    result->numberOfMatches = 0;
+    result->memoryWaste =  KMPEM * sizeof(int *) + request->pattern->needleSize * sizeof(int);
+    result->numOfCompares = 0;
+    result->numOfExtraOps = 0;
+
+    prefix_mass = (int *) calloc(request->pattern->needleSize, sizeof(int));
+    prefix_mass[0] = 0;
+    result->numOfExtraOps = request->pattern->needleSize;
+
+    while (i != request->pattern->needleSize) {
+        if (request->pattern->needle[j] == request->pattern->needle[i]) {
+            prefix_mass[i] = j + 1;
+            i++;
+            j++;
+        } else {
+            if (j == 0) {
+                prefix_mass[i] = 0;
+                i++;
+            } else {
+                j = prefix_mass[j - 1];
+            }
+        }
+    }
+
+    i = 0, j = 0;
+    while (i != request->text->haystackSize) {
+        while (j > 0 && request->pattern->needle[j] != request->text->haystack[i]) {
+            result->numOfCompares++;
+            j = prefix_mass[j - 1];
+        }
+        if (request->text->haystack[i] == request->pattern->needle[j]) {
+            result->numOfCompares++;
+            j++;
+        }
+        if (j == request->pattern->needleSize) {
+            result->matchedShifts[result->numberOfMatches++] = i - request->pattern->needleSize + 1;
+
+        }
+        i++;
+    }
+
+    free(prefix_mass);
+    finish = clock();
+    result->workTime = (double) (finish - start) / CLOCKS_PER_SEC;
+
+    return result;
+}
+
 int main()
 {
 	SearchRequest *request;
@@ -231,3 +290,4 @@ int main()
 
 	return 0;
 }
+
