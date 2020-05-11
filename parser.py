@@ -36,6 +36,6 @@ def book_parser ():
                 text = page_book_txt.find_all('p')
                 for p in text:
                     s = s + p.text
-                return s
+                g = s.encode('utf-8')
+                return g
         i = random.randint(0, 99)
-
