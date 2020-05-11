@@ -1,14 +1,17 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <malloc.h>
+#include <stdlib.h>
+
 #include "structs.h"
 #include "generators.h"
 #include "main_func.h"
-#include <malloc.h>
-#include <stdlib.h>
 #include "my_parser.h"
 #include "file.h"
 
 
 SearchResult* statictics_for_stroke( SearchResult* (algorithm)(SearchRequest* request), int texts_num, char* pattern, char *file_in) {
     int pointer = 0;
+    SearchResult* Result;
 
     SearchResult* StaticticResult = NULL;
     StaticticResult = (SearchResult*)malloc(sizeof(SearchResult));
@@ -46,28 +49,32 @@ SearchResult* statictics_for_stroke( SearchResult* (algorithm)(SearchRequest* re
     for (int i = 0; i < texts_num; i++) {
         
         Request->text->haystack = string_compiling(alf, probability, line_num,i);
-        printf("%s\n\n\n", Request->text->haystack);
         Request->text->haystackSize = strlen(Request->text->haystack);
-        //free(Request->text->haystack);
+        
 
-        SearchResult* Result;
         Result = algorithm(Request);
+
         StaticticResult->numberOfMatches += Result->numberOfMatches;
         StaticticResult->numOfCompares += Result->numOfCompares;
         StaticticResult->numOfExtraOps += Result->numOfExtraOps;
         StaticticResult->workTime += Result->workTime;
         StaticticResult->memoryWaste += Result->memoryWaste;
+
+        free(Request->text->haystack);
+
     }
 
     
+    free(Request->pattern->needle);
+    free(Request->pattern);
+    free(Request->text);
+    free(Request);
 
-    //for (int i = 0; i < line_num ; i++)  // цикл по строкам
-    //	free(alf[i]);   // освобождение памяти под строку
-    //free(alf);
-
-    //free(data);
-
-    //free(probability);
+    for (int i = 0; i < line_num ; i++)  // цикл по строкам
+    	free(alf[i]);   // освобождение памяти под строку
+    free(alf);
+ 
+    free(probability);
 
     StaticticResult->numberOfMatches = StaticticResult->numberOfMatches / texts_num;
     StaticticResult->numOfCompares = StaticticResult->numOfCompares / texts_num;
@@ -105,7 +112,7 @@ SearchResult* statictics_for_text( int patterns_num, SearchResult* (algorithm)(S
     for (int i = 0; i < texts_num; i++) {
           Request->text->haystack = text_compiling(data, line_num, patterns_num, pattern,i);
           Request->text->haystackSize = strlen(Request->text->haystack);
-          printf("%s\n\n\n", Request->text->haystack);
+          
           SearchResult* Result;
           Result = algorithm(Request);
           StaticticResult->numberOfMatches += Result->numberOfMatches;
@@ -113,7 +120,15 @@ SearchResult* statictics_for_text( int patterns_num, SearchResult* (algorithm)(S
           StaticticResult->numOfExtraOps += Result->numOfExtraOps;
           StaticticResult->workTime += Result->workTime;
           StaticticResult->memoryWaste += Result->memoryWaste;
+
+          free(Request->text->haystack);
+
     }
+
+    free(Request->pattern->needle);
+    free(Request->pattern);
+    free(Request->text);
+    free(Request);
 
     StaticticResult->numberOfMatches = StaticticResult->numberOfMatches / texts_num;
     StaticticResult->numOfCompares = StaticticResult->numOfCompares / texts_num;
@@ -147,9 +162,15 @@ SearchResult* statictics_for_book(SearchResult* (algorithm)(SearchRequest* reque
     pFunc = python_func_init();
     for (int i = 0; i < texts_num; i++) {
          Request->text->haystack = _strdup(parser(pFunc));
-         Request->text->haystackSize = strlen(Request->text->haystack);
+         char* istr1 = strrchr(Request->text->haystack, '\'');
+
+         Request->text->haystackSize = istr1 - Request->text->haystack;
+         
+
          SearchResult* Result;
          Result = algorithm(Request);
+
+         free(Request->text->haystack);
          StaticticResult->numberOfMatches += Result->numberOfMatches;
          StaticticResult->numOfCompares += Result->numOfCompares;
          StaticticResult->numOfExtraOps += Result->numOfExtraOps;
@@ -159,10 +180,15 @@ SearchResult* statictics_for_book(SearchResult* (algorithm)(SearchRequest* reque
    
     python_clean(pFunc);
 
+    free(Request->pattern->needle);
+    free(Request->pattern);
+    free(Request->text);
+    free(Request);
+
     StaticticResult->numberOfMatches = StaticticResult->numberOfMatches / texts_num;
     StaticticResult->numOfCompares = StaticticResult->numOfCompares / texts_num;
     StaticticResult->numOfExtraOps = StaticticResult->numOfExtraOps / texts_num;
-    StaticticResult->workTime = StaticticResult->memoryWaste / texts_num;
+    StaticticResult->workTime = StaticticResult->workTime / texts_num;
     StaticticResult->memoryWaste = StaticticResult->memoryWaste / texts_num;
 
     return  StaticticResult;
