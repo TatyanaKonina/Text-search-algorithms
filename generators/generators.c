@@ -40,16 +40,16 @@ char* string_compiling(char** alf, float* probability, int line_num,int shift) {
 }
 
 char* text_compiling(char** data, int line_num, int patterns_num, char* pattern,int shift) {
-
+	int* random_positions = NULL;
 	char* text = NULL;
 	int pointer = 0;
 	text = (char*)calloc(WORDS_NUM * max_world_len, sizeof(char));
 
 	srand(time(NULL) + shift);
-	if (patterns_num) {
-		int* random_positions = (int*)calloc(patterns_num, sizeof(int));
+	if (patterns_num) { //если пользователь хочет текст с паттернами
+		random_positions = (int*)calloc(patterns_num, sizeof(int));
 		int i = 0;
-		while (i < patterns_num) {
+		while (i < patterns_num) {//создаем массив рандомных позиций
 			random_positions[i++] = rand() % WORDS_NUM;
 			for (int j = 0; j < i - 1; j++) {
 				if (random_positions[j] == random_positions[i - 1]) {
@@ -58,29 +58,25 @@ char* text_compiling(char** data, int line_num, int patterns_num, char* pattern,
 				}
 			}
 		}
-		quick_sort(random_positions, 0, patterns_num - 1);
-		for (i = 0; i < WORDS_NUM; i++) {
-			if (i == random_positions[pointer]) {
-				pointer++;
-				strcat(text, pattern);
-				strcat(text, " ");
-			}
-			else {
-				int r = rand() % line_num;
-				strcat(text, data[r]);
-			}
-		}
-		free(random_positions);
+		quick_sort(random_positions, 0, patterns_num - 1);//сортируем
 	}
-	else {
-		for (int i = 0; i < WORDS_NUM; i++) {
+	for (int i = 0; i < WORDS_NUM; i++) {
+		if ((i == random_positions[pointer]) && patterns_num) {
+			pointer++;               // если попали на               
+			strcat(text, pattern);   //рандомную позиция                      
+			strcat(text, " ");       // вставляем паттерн
+		}
+		else {
 			int r = rand() % line_num;
 			strcat(text, data[r]);
 		}
 	}
+	if (patterns_num) {
+		free(random_positions);
+	}
+
 	return text;
 }
-
 void quick_sort(int* random_positions, int first, int last)
 {
 	int i = first, j = last, x = random_positions[(first + last) / 2];
