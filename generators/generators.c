@@ -20,14 +20,15 @@ char* string_compiling(char** alf, float* probability, int line_num,int shift) {
 
 	char* string = (char*)calloc(WORDS_NUM * max_world_len, sizeof(char));
 	int rand_digit;
+	//составление диапазонов
 	for (int i = 0; i < line_num; i++) {
-		i == 0 ? tempt[i] = tempt[i] * 1000 : (tempt[i] = tempt[i] * 1000 + tempt[i / 2]);
+		i == 0 ? tempt[i] = tempt[i] * 1000 : (tempt[i] = tempt[i] * 1000 + tempt[i / 2]); 
 	}
 	int random_size = (int)tempt[line_num - 2];
 	srand(time(NULL) + shift);
 	for (int i = 0; i < WORDS_NUM * max_world_len - 1; i++) {
 		rand_digit = rand() % (random_size + 1);
-		for (int j = 0; j < line_num - 1; j++) {
+		for (int j = 0; j < line_num - 1; j++) {//проверка на подходящий диапазон
 			if ((int)tempt[j] >= rand_digit) {
 				strcat(string, alf[j]);
 				break;
