@@ -13,7 +13,7 @@ SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, ch
     //возвращает массив тестов
     SearchRequest* storage = (SearchRequest*)malloc(texts_num * sizeof(SearchRequest));
     switch (text_type) {
-    case 0: {
+    case STRING: {
         int line_num = words_num_in_file(file_in);
         char** data = read_data(file_in, line_num);
         char** alf = (char**)malloc((line_num) * sizeof(char*));
@@ -31,7 +31,7 @@ SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, ch
         }
         break;
     }
-    case 1: {
+    case TEXT: {
         int line_num = words_num_in_file(file_in);
         char** data = read_data(file_in, line_num);
         for (int i = 0; i < texts_num; i++) {
@@ -42,7 +42,7 @@ SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, ch
         }
         break;
     }
-    case 2: {
+    case BOOK: {
         PyObject* pFunc;
         pFunc = python_func_init();
         for (int i = 0; i < texts_num; i++) {
