@@ -2,84 +2,97 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
 
+class Tab(QDialog):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("myproj")
+        self.resize(900, 450)
+
+        vbox=QVBoxLayout()
+        tabWidget=QTabWidget()
+        tabWidget.setTabPosition(QTabWidget.South)
+
+        tabWidget.addTab(TextGeneration(), "Text Generation")
+        vbox.addWidget(tabWidget)
+        self.setLayout(vbox)
+
+        tabWidget.addTab(FindWord(), "Algorithms")
+
+        vbox.addWidget(tabWidget)
+        self.setLayout(vbox)
+
+
+
+class TextGeneration(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        label=QLabel("Text Generation")
+        label.setFont(QtGui.QFont("Calibri", 8))
+
+        comboBox = QComboBox()
+        comboBox.addItems(["Full Random", "Random words", "Text"])
+       # comboBox.setFont(QtGui.QFont("Calibri", 9))
+
+        sourceText=QTextEdit()
+
+
+        textCombobox=QComboBox()
+        textCombobox.addItems(["Text 1", "Text 2", "Text 3", "Text 4"])
+
+        sizeLine=QLineEdit()
+        countLine=QLineEdit()
+        labelSourceText=QLabel("SourceText")
+        buttonOk=QPushButton("OK")
+
+
+
+        fbox=QFormLayout()
+        gbox=QGridLayout()
+        fbox1=QFormLayout()
+
+
+        fbox.addRow(label)
+
+        fbox.addRow(comboBox)
+        fbox.addRow("Size of text: ", sizeLine)
+        fbox.addRow("Text count: ", countLine)
+        fbox.addRow("            ", buttonOk)
+        fbox1.addRow(labelSourceText)
+        fbox1.addRow(textCombobox)
+        fbox1.addRow(sourceText)
+        gbox.setColumnStretch(1,1)
+        gbox.addLayout(fbox,0,0)
+        gbox.addLayout(fbox1,0,1)
+
+       # hbox.addWidget(sourceText)
+
+
+
+        self.setLayout(gbox)
+        #self.setLayout(hbox)
+
+
+
+
+
+class FindWord(QWidget):
+    def __init__(self):
+        super().__init__()
+
+
+class Result(QWidget):
+    def __init__(self):
+        super().__init__()
+
+
 if __name__ == '__main__':
 
-    app = QApplication(sys.argv)      #создание объекта класса QApplication
 
-    w = QWidget()
-    w.resize(1200, 685)
-    w.move(200, 200)
-    w.setWindowTitle('Pattern Matching')
-
-    textGen=QLabel(w)
-    textGen.setText("Text Generation")
-    textGen.setFont(QtGui.QFont("Calibri", 13, QtGui.QFont.Bold))
-    textGen.move(65,45)
-
-    comboBox=QComboBox(w)
-    comboBox.move(20, 80)
-    comboBox.addItems(["Full Random", "Random words", "Text"])
-    comboBox.setFont(QtGui.QFont("Calibri", 10))
-    comboBox.resize(250,50)
-
-    textCountLab=QLabel(w)
-    textCountLab.setText("Text count")
-    textCountLab.setFont(QtGui.QFont("Calibri", 10))
-    textCountLab.move(20, 140)
-
-    numText=QLineEdit(w)
-    numText.move(100, 140)
-    numText.setFixedWidth(170)
-
-    algLab= QLabel(w)
-    algLab.setText("Algorithms")
-    algLab.setFont(QtGui.QFont("Calibri", 13, QtGui.QFont.Bold))
-    algLab.move(90, 195)
-
-    algComboBox = QComboBox(w)
-    algComboBox.move(20, 230)
-    algComboBox.addItems(["Naive matcher", "Rabin-Karp", "Boyer-Moor-Horspool", "Knuth-Morris-Pratt", "Ukkonen's algorithm"])
-    algComboBox.setFont(QtGui.QFont("Calibri", 10))
-    algComboBox.resize(250, 50)
-
-    wordLab = QLabel(w)
-    wordLab.setText("Finded word")
-    wordLab.setFont(QtGui.QFont("Calibri", 13, QtGui.QFont.Bold))
-    wordLab.move(75, 315)
-
-    algComboBox = QComboBox(w)
-    algComboBox.move(20, 350)
-    algComboBox.addItems(
-        ["Full Random", "Random Word", "Entered Word"])
-    algComboBox.setFont(QtGui.QFont("Calibri", 10))
-    algComboBox.resize(250, 50)
-
-    enterWord=QLineEdit(w)
-    enterWord.move(20, 410)
-    enterWord.setFixedWidth(250)
+    app = QApplication(sys.argv)   #создание объекта класса QApplication
+    tabDialog=Tab()
 
 
-    optLab = QLabel(w)
-    optLab.setText("Options")
-    optLab.setFont(QtGui.QFont("Calibri", 13, QtGui.QFont.Bold))
-    optLab.move(100, 470)
-
-    sourceText=QTextEdit(w)
-    sourceText.move(290, 80)
-    sourceText.resize(440, 585)
-
-    resultText = QTextEdit(w)
-    resultText.move(740, 80)
-    resultText.resize(440, 585)
-
-    sourceLab = QLabel(w)
-    sourceLab.setText("Source text")
-    sourceLab.setFont(QtGui.QFont("Calibri", 13, QtGui.QFont.Bold))
-    sourceLab.move(450, 45)
-
-    resultLab = QLabel(w)
-    resultLab.setText("Result")
-    resultLab.setFont(QtGui.QFont("Calibri", 13, QtGui.QFont.Bold))
-    resultLab.move(920, 45)
-    w.show()
+    tabDialog.show()
     sys.exit(app.exec_())
