@@ -5,38 +5,29 @@
 
 PyObject* python_func_init() {
     PyObject* pName, * pModule, * pDict, * pFunc, * pVal;
-    Py_Initialize();
-    PyObject* sysmodule = PyImport_ImportModule("sys");
-    PyObject* syspath = PyObject_GetAttrString(sysmodule, "path");
+    Py_Initialize();// Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¸Ð½Ñ‚ÐµÑ€Ð¿Ñ€ÐµÑ‚Ð°Ñ‚Ð¾Ñ€Ð° Python
+    PyObject* sysmodule = PyImport_ImportModule("sys");// Ð’Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´ Ð² Ð¸Ð½Ñ‚ÐµÑ€Ð¿Ñ€ÐµÑ‚Ð°Ñ‚Ð¾Ñ€Ðµ
+    PyObject* syspath = PyObject_GetAttrString(sysmodule, "path");// Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¼Ð¾Ð´ÑƒÐ»Ñ sys
     PyList_Append(syspath, PyUnicode_FromString("."));
     Py_DECREF(syspath);
     Py_DECREF(sysmodule);
-
-    // Initialize the Python Interpreter
-    // Build the name object
-    pName = PyUnicode_FromString("try");
+    pName = PyUnicode_FromString("try"); // Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° try.py
     if (!pName) {
         exit( ERROR_OPEN_PYFILE);
     }
-
-    // Load the module object
-    pModule = PyImport_Import(pName);
+    pModule = PyImport_Import(pName);/ Ð—Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð¾Ð±ÑŠÐµÐºÑ‚ Ð¼Ð¾Ð´ÑƒÐ»Ñ
     if (!pModule) {
         exit( ERROR_MODULE_OBJECT);
     }
-
-    // pDict is a borrowed reference 
-    pDict = PyModule_GetDict(pModule);
+    pDict = PyModule_GetDict(pModule);// Ð¡Ð»Ð¾Ð²Ð°Ñ€ÑŒ Ð¾Ð±ÑŠÐµÐºÑ‚Ð¾Ð² ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‰Ð¸Ñ…ÑÑ Ð² Ð¼Ð¾Ð´ÑƒÐ»Ðµ
     if (!pDict) {
         exit( ERROR_DICT_OBJECT);
     }
-
-    // pFunc is also a borrowed reference 
     pFunc = PyDict_GetItemString(pDict, "book_parser");
     if (!pFunc) {
         exit( ERROR_FUNC);
     }
-    Py_DECREF(pDict);
+    Py_DECREF(pDict);// Ð’ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ñ€ÐµÑÑƒÑ€ÑÑ‹ ÑÐ¸ÑÑ‚ÐµÐ¼Ðµ
     Py_DECREF(pModule);
     Py_DECREF(pName);
     return pFunc;
@@ -45,13 +36,11 @@ PyObject* python_func_init() {
 char* parser(PyObject* pFunc) {
     char* text = NULL;
     PyObject* pVal;
-    if (PyCallable_Check(pFunc))
+    if (PyCallable_Check(pFunc))// ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° pObjct Ð½Ð° Ð³Ð¾Ð´Ð½Ð¾ÑÑ‚ÑŒ.
     {
-        pVal = PyObject_CallFunction(pFunc, NULL);
+        pVal = PyObject_CallFunction(pFunc, NULL);// ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ Ð¾Ð±ÑŠÐµÐºÑ‚ Ñ Ð¸Ð¼ÐµÐ½ÐµÐ¼ val
         if (pVal != NULL) {
             PyObject* pResultRepr = PyObject_Repr(pVal);
-            // Åñëè ïîëó÷åííóþ ñòðîêó íå ñêîïèðîâàòü, òî ïîñëå î÷èñòêè ðåñóðñîâ Python å¸ íå áóäåò.
-            // Äëÿ íà÷àëà pResultRepr íóæíî ïðèâåñòè ê ìàññèâó áàéòîâ.
             text = _strdup(PyBytes_AS_STRING(PyUnicode_AsEncodedString(pResultRepr, "utf-8", "ERROR")));
             Py_XDECREF(pResultRepr);
             Py_XDECREF(pVal);
@@ -62,30 +51,7 @@ char* parser(PyObject* pFunc) {
     }
     return text;
 }
-
 void python_clean(PyObject* pFunc) {
     Py_DECREF(pFunc);
-    Py_Finalize();// Finish the Python Interpreter
-}
-
-SearchRequest* text_parser(char * pattern) {
-    SearchRequest* Request;
-    Request = (SearchRequest*)malloc(sizeof(SearchRequest));
-    Request->pattern = (Pattern*)malloc(sizeof(Pattern));
-    Request->pattern->needleSize = 0;
-    Request->text = (Text*)malloc(sizeof(Text));
-    Request->text->haystackSize = 0;
-
-    Request->pattern->needle = _strdup(pattern);
-    Request->pattern->needleSize = strlen(pattern);
-
-    PyObject* pFunc;
-    pFunc = python_func_init();
-   
-    Request->text->haystack = _strdup(parser(pFunc));
-    Request->text->haystackSize = strlen(Request->text->haystack);
-
-    python_clean(pFunc);
-
-    return Request;
+    Py_Finalize();
 }
