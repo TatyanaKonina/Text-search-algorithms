@@ -4,10 +4,12 @@
 #include "structs.h"
 
 
-SearchResult* statictics_for_stroke( SearchResult* (algorithm)(SearchRequest* request), int texts_num, char* pattern, char * file_in);
-
-SearchResult* statictics_for_text( int patterns_num, SearchResult* (algorithm)(SearchRequest* request), int texts_num, char* pattern, char* file_in);
-
-SearchResult* statictics_for_book(SearchResult* (algorithm)(SearchRequest* request), int texts_num, char* pattern);
+SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, char* pattern, int pattern_num, int num);
+ 
+void Init_Memory_Request(SearchRequest* storage, int text_type, char * pattern);
+ 
+SearchRequest* make_result_storage(SearchRequest* texts_storage, SearchResult* (algorithm)(SearchRequest* request), int texts_num);
+ 
+SearchResult* make_statictic(SearchResult* result_storage, int texts_num);
 #endif
 
