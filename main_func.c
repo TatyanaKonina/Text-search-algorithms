@@ -9,7 +9,7 @@
 #include "file.h"
 
 
-SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, char* pattern, int pattern_num) {
+SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, char* pattern, int pattern_num, int num) {
     //возвращает массив тестов
     SearchRequest* storage = (SearchRequest*)malloc(texts_num * sizeof(SearchRequest));
     switch (text_type) {
@@ -25,8 +25,8 @@ SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, ch
         processing_file_with_probability(data, alf, probability, line_num);
         for (int i = 0; i < texts_num; i++) {
             Init_Memory_Request(&storage[i], text_type, pattern);
-            storage[i].text->haystack = string_compiling(alf, probability, line_num, i);
-            printf("%s\n", storage[i].text->haystack);
+            storage[i].text->haystack = string_compiling(alf, probability, line_num, i,num);
+            //printf("%s\n", storage[i].text->haystack);
             storage[i].text->haystackSize = strlen(storage[i].text->haystack);
         }
         break;
@@ -36,7 +36,7 @@ SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, ch
         char** data = read_data(file_in, line_num);
         for (int i = 0; i < texts_num; i++) {
             Init_Memory_Request(&storage[i], text_type,pattern);
-            storage[i].text->haystack = text_compiling(data, line_num, pattern_num, pattern, i);
+            storage[i].text->haystack = text_compiling(data, line_num, pattern_num, pattern, i,num);
             printf("%s\n", storage[i].text->haystack);
             storage[i].text->haystackSize = strlen(storage[i].text->haystack);
         }
