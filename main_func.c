@@ -8,7 +8,7 @@
 #include "my_parser.h"
 #include "file.h"
 
-
+const int max_len_word = 10;
 SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, char* pattern, int pattern_num, int num) {
     //возвращает массив тестов
     SearchRequest* storage = (SearchRequest*)malloc(texts_num * sizeof(SearchRequest));
@@ -19,7 +19,7 @@ SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, ch
         char** alf = (char**)malloc((line_num) * sizeof(char*));
         for (int i = 0; i < line_num; i++)
         {
-            alf[i] = (char*)malloc((10) * sizeof(char));
+            alf[i] = (char*)malloc((max_len_word) * sizeof(char));
         }
         float* probability = (float*)calloc(line_num, sizeof(float));
         processing_file_with_probability(data, alf, probability, line_num);
@@ -48,8 +48,14 @@ SearchRequest* make_text_storage(int texts_num, int text_type, char* file_in, ch
         for (int i = 0; i < texts_num; i++) {
             Init_Memory_Request(&storage[i], text_type,pattern);
             storage[i].text->haystack = parser(pFunc);
-            printf("%s\n", storage[i].text->haystack);
+            if (strlen(storage[i].text->haystack) > num * max_len_word) {
+                storage[i].text->haystack[num * max_len_word] = '\0';
+                storage[i].text->haystackSize = num;
+            }
+            else{
+            //printf("%s\n", storage[i].text->haystack);
             storage[i].text->haystackSize = strlen(storage[i].text->haystack);
+            }
         }
     }
     }
