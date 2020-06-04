@@ -13,7 +13,7 @@ const int str_size = 10;
 
 #define ALPHSIZE 123
 #define BASE 256
-#define QMOD 13
+#define QMOD 101
 #define NAIMEM 1 //уникальный только matched
 #define RKMEM 4 //уникальные: matched, radix, patNumber, textNumber
 #define BMHMEM 127 //уникальные: ind, textInd, positionn, equal, badCharaters с размером ALPHSIZE + внутри функции считается динамически выделенная память под relatedshifts
@@ -140,23 +140,28 @@ SearchResult* rabinKarpMatcher(SearchRequest* request)
 	result->numOfCompares = 0;
 	result->numOfExtraOps = 0;
 
-	radix = (int)pow((float)BASE, request->pattern->needleSize - 1) % QMOD;
+	for (i = 0; i < request->pattern->needleSize - 1; i++) {
+		radix = (radix * BASE) % QMOD;
+	}
 
 	for (i = 0; i < request->pattern->needleSize; i++) {
 		patNumber = (BASE * patNumber + request->pattern->needle[i]) % QMOD;
 		textNumber = (BASE * textNumber + request->text->haystack[i]) % QMOD;
-		result->numOfExtraOps += 2; //ну тут просто хэши создаются циклом, может тоже считать за extra operation?
+		result->numOfExtraOps += 2;
 	}
 
 	for (shift = 0; shift <= (request->text->haystackSize) - (request->pattern->needleSize); shift++) {
 		matched = 0;
 		if (patNumber == textNumber) {
-			for (i = 0; i < request->pattern->needleSize; i++) {                         //
-				if (request->pattern->needle[i] == request->text->haystack[shift + i]) { //
-					matched++;                                                           //может переделать цикл и дбавить в него if c break, чтобы лишних итераций не капало?
-					result->numOfCompares++;                                             //
-				}                                                                        //
-			}                                                                            //
+			for (i = 0; i < request->pattern->needleSize; i++) {                         
+				result->numOfCompares++;                       
+				if (request->pattern->needle[i] != request->text->haystack[shift + i]) {
+					i = request->pattern->needleSize;                                                           
+				}
+				else {
+					matched++; 
+				}                                                                      
+			}                                                                            
 			if (matched == request->pattern->needleSize) {
 				result->matchedShifts[result->numberOfMatches++] = shift;
 			}
