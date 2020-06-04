@@ -24,27 +24,27 @@ extern const int alphabetAccess[];
 //-----------------------------------------------algorithms----------------------------------------------------------------------------------------------------------------
 SearchResult* boyerMooreHorspoolMatcher(SearchRequest* request)
 {
-	SearchResult* result;
+	SearchResult *result;
 	int shift = 1, i = 0, ind = 1, textInd = 0, position = (request->pattern->needleSize) - 1, equal = 0;
-	int badCharacters[ALPHSIZE] = { 0 }, * relatedShifts;
-	char safeCharacter = 0;
+	int badCharacters[ALPHSIZE]={0}, *relatedShifts;
+	char safeCharacter=0;
 	clock_t start, finish;
 	start = clock();
 
-	result = (SearchResult*)malloc(sizeof(SearchResult));
-	result->matchedShifts = (int*)calloc(request->text->haystackSize, sizeof(int));
+	result = (SearchResult*) malloc(sizeof(SearchResult));
+	result->matchedShifts = (int*) calloc(request->text->haystackSize, sizeof(int));
 	result->numberOfMatches = 0;
 	result->memoryWaste = BMHMEM * sizeof(int) + sizeof(int*) + request->pattern->needleSize * sizeof(int);
 	result->numOfCompares = 0;
 	result->numOfExtraOps = 0;
 
-	relatedShifts = (int*)calloc(request->pattern->needleSize, sizeof(int));
+	relatedShifts = (int*) calloc(request->pattern->needleSize, sizeof(int));
 
 	for (i = request->pattern->needleSize - 2; i >= 0; i--) {
 		if (badCharacters[request->pattern->needle[i]] < 1) {  //extra comparison
 			badCharacters[request->pattern->needle[i]] = ind;
-			relatedShifts[ind - 1] = shift;
-			result->numOfExtraOps++;
+			relatedShifts[ind-1] = shift;
+			result->numOfExtraOps++; 
 			ind++;
 		}
 		shift++;
@@ -52,51 +52,39 @@ SearchResult* boyerMooreHorspoolMatcher(SearchRequest* request)
 
 	shift = 0;
 
-	while (shift <= (request->text->haystackSize) - (request->pattern->needleSize)) {
+	while (shift <= (request->text->haystackSize) - (request->pattern->needleSize) ) {
 		ind = (request->pattern->needleSize) - 1;
 		textInd = position;
 		equal = 1;
 		safeCharacter = request->text->haystack[textInd];
 		while (equal && ind >= 0) {
-			if (!(request->pattern->needle[ind] == request->text->haystack[textInd])) {
+			if ( !(request->pattern->needle[ind] == request->text->haystack[textInd]) ) {
 				equal = 0;
 			}
 			else {
-				ind--;
-				textInd--;
+			ind--;
+			textInd--;
 			}
 			result->numOfCompares++;
 		}
 		if (equal) { //
 			result->matchedShifts[result->numberOfMatches++] = shift;
-			if (badCharacters[safeCharacter]) { //
-				shift += relatedShifts[badCharacters[safeCharacter] - 1];
-				position += relatedShifts[badCharacters[safeCharacter] - 1];
-				result->numOfExtraOps += 2; //х2 extra comparison
-			}
-			else {
-				shift += request->pattern->needleSize;
-				position += request->pattern->needleSize;
-				result->numOfExtraOps += 2; //х2 extra comparison (failed if statement)
-			}
+		}
+		if (badCharacters[safeCharacter]) { //
+			shift += relatedShifts[badCharacters[safeCharacter] - 1];
+			position += relatedShifts[badCharacters[safeCharacter] - 1];
+			result->numOfExtraOps++; // extra comparison
 		}
 		else {
-			if (badCharacters[request->text->haystack[textInd]]) { //
-				shift += relatedShifts[badCharacters[request->text->haystack[textInd]] - 1];
-				position += relatedShifts[badCharacters[request->text->haystack[textInd]] - 1];
-				result->numOfExtraOps += 2; //х2 extra comparison (failed if(equal) statement)
-			}
-			else {
-				shift += request->pattern->needleSize;
-				position += request->pattern->needleSize;
-				result->numOfExtraOps += 2; //х2 extra comparison (failed if statement + failed if(equal) statement)
-			}
+			shift += request->pattern->needleSize;
+			position += request->pattern->needleSize;
+			result->numOfExtraOps += 2; //х2 extra comparison (failed if statement)
 		}
 	}
 
 	free(relatedShifts);
 	finish = clock();
-	result->workTime = (double)(finish - start) / CLOCKS_PER_SEC;
+	result->workTime = (double)(finish -start) / CLOCKS_PER_SEC;
 
 	return result;
 }
