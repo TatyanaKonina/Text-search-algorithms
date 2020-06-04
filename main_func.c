@@ -91,14 +91,14 @@ SearchResult* boyerMooreHorspoolMatcher(SearchRequest* request)
 
 SearchResult* naiveStringMatcher(SearchRequest* request)
 {
-	SearchResult* result;
+	SearchResult *result;
 	int shift = 0, matched = 0, i = 0;
 	clock_t start, finish;
 	start = clock();
 
 
-	result = (SearchResult*)malloc(sizeof(SearchResult));
-	result->matchedShifts = (int*)calloc(request->text->haystackSize, sizeof(int));
+	result = (SearchResult*) malloc(sizeof(SearchResult));
+	result->matchedShifts = (int*) calloc(request->text->haystackSize, sizeof(int));
 	result->memoryWaste = NAIMEM * sizeof(int);
 	result->numberOfMatches = 0;
 	result->numOfCompares = 0;
@@ -106,19 +106,22 @@ SearchResult* naiveStringMatcher(SearchRequest* request)
 
 	for (shift = 0; shift <= (request->text->haystackSize) - (request->pattern->needleSize); shift++) {
 		matched = 0;
-		for (i = 0; i < (request->pattern->needleSize); i++) {                        //
-			if (request->pattern->needle[i] == request->text->haystack[shift + i]) {  //
-				matched++;                                                            //может переделать цикл и дбавить в него if c break, чтобы лишних итераций не капало?
-			}																		  //
-			result->numOfCompares++;											      //
-		}																			  //
-		if (matched == request->pattern->needleSize) {
+		for (i = 0; i < (request->pattern->needleSize); i++) { 																		
+			result->numOfCompares++;                       
+			if (request->pattern->needle[i] != request->text->haystack[shift + i]) {
+				i = request->pattern->needleSize;                                                           
+			}
+			else {
+				matched++; 
+			}
+		}																		
+		if (matched == request->pattern->needleSize ) {
 			result->matchedShifts[result->numberOfMatches++] = shift;
 		}
 	}
 
 	finish = clock();
-	result->workTime = (double)(finish - start) / CLOCKS_PER_SEC;
+	result->workTime = (double)(finish -start) / CLOCKS_PER_SEC;
 
 	return result;
 }
