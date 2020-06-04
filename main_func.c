@@ -78,7 +78,7 @@ SearchResult* boyerMooreHorspoolMatcher(SearchRequest* request)
 		else {
 			shift += request->pattern->needleSize;
 			position += request->pattern->needleSize;
-			result->numOfExtraOps += 2; //х2 extra comparison (failed if statement)
+			result->numOfExtraOps++; //extra comparison (failed if statement)
 		}
 	}
 
@@ -128,13 +128,13 @@ SearchResult* naiveStringMatcher(SearchRequest* request)
 
 SearchResult* rabinKarpMatcher(SearchRequest* request)
 {
-	SearchResult* result;
-	int radix = 0, patNumber = 0, textNumber = 0, shift = 0, matched = 0, i = 0;
+	SearchResult *result;
+	int patNumber = 0, textNumber = 0, shift = 0, matched = 0, i = 0, radix = 1; 
 	clock_t start, finish;
 	start = clock();
 
-	result = (SearchResult*)malloc(sizeof(SearchResult));
-	result->matchedShifts = (int*)calloc(request->text->haystackSize, sizeof(int));
+	result = (SearchResult*) malloc(sizeof(SearchResult));
+	result->matchedShifts = (int*) calloc(request->text->haystackSize, sizeof(int));
 	result->memoryWaste = RKMEM * sizeof(int);
 	result->numberOfMatches = 0;
 	result->numOfCompares = 0;
@@ -150,7 +150,7 @@ SearchResult* rabinKarpMatcher(SearchRequest* request)
 		result->numOfExtraOps += 2;
 	}
 
-	for (shift = 0; shift <= (request->text->haystackSize) - (request->pattern->needleSize); shift++) {
+	for (shift = 0; shift <= (request->text->haystackSize) - (request->pattern->needleSize) ; shift++) {
 		matched = 0;
 		if (patNumber == textNumber) {
 			for (i = 0; i < request->pattern->needleSize; i++) {                         
@@ -160,14 +160,14 @@ SearchResult* rabinKarpMatcher(SearchRequest* request)
 				}
 				else {
 					matched++; 
-				}                                                                      
+				}                                                                    
 			}                                                                            
 			if (matched == request->pattern->needleSize) {
 				result->matchedShifts[result->numberOfMatches++] = shift;
 			}
 			result->numOfExtraOps++; //comparisons of hashes
 		}
-		if (shift <= (request->text->haystackSize) - (request->pattern->needleSize)) { //это сравнение вроде как лишнее, так как задано в цикле, но в книге оно было. Оставлять или не нужно?
+		if (shift <= (request->text->haystackSize) - (request->pattern->needleSize) ) {
 			textNumber = (BASE * (textNumber - (request->text->haystack[shift]) * radix) + request->text->haystack[shift + request->pattern->needleSize]) % QMOD;
 			result->numOfExtraOps++;
 		}
@@ -178,7 +178,7 @@ SearchResult* rabinKarpMatcher(SearchRequest* request)
 	}
 
 	finish = clock();
-	result->workTime = (double)(finish - start) / CLOCKS_PER_SEC;
+	result->workTime = (double)(finish -start) / CLOCKS_PER_SEC;
 
 	return result;
 }
