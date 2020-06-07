@@ -391,7 +391,6 @@ char* text_compiling(char** data, int line_num, int patterns_num, char* pattern,
 }
 
 //----------------------------------------------dll-func---------------------------------------------------------------------------------------------------------------------
-
 DLL_EXPORT SearchRequest* make_text_storage (int texts_num, int text_type, char* file_in, char* pattern, int pattern_num, int num) {
 	
     //возвращает массив тестов
@@ -420,11 +419,9 @@ DLL_EXPORT SearchRequest* make_text_storage (int texts_num, int text_type, char*
         int line_num = words_num_in_file(file_in);
         char** data = read_data(file_in, line_num);
         for (int i = 0; i < texts_num; i++) {
-			text = text_compiling(data, line_num, pattern_num, pattern, i, num);
+	    text = text_compiling(data, line_num, pattern_num, pattern, i, num);
             Init_Memory_Request(&storage[i], text_type, pattern,text);
-            //storage[i].text->haystack = text_compiling(data, line_num, pattern_num, pattern, i, num);
-           // printf("%s\n", storage[i].text->haystack);
-            //storage[i].text->haystackSize = strlen(storage[i].text->haystack);
+
         }
     }
    
@@ -502,11 +499,12 @@ DLL_EXPORT SearchResult* make_statictic(SearchResult* result_storage, int texts_
 }
 
 DLL_EXPORT SearchRequest* make_parser_storage(char ** text, char* pattern, int texts_num,int len) {
+	len *= 10;
 	SearchRequest* storage = (SearchRequest*)malloc(texts_num * sizeof(SearchRequest));
 	for (int i = 0; i < texts_num; i++) {
 		Init_Memory_Request(&storage[i], BOOK, pattern,text[i]);
 		if (storage[i].text->haystackSize > len) {
-			storage[i].text->haystack[len] = '\0';
+			storage[i].text->haystack[len + 1] = '\0';
 			storage[i].text->haystackSize = strlen(storage[i].text->haystack);
 		}
 	}
