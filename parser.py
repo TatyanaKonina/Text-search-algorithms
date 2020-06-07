@@ -9,8 +9,8 @@ def book_parser (size):
     s =""
     url = 'http://www.loyalbooks.com/Top_100/'
     main_link = 'http://www.loyalbooks.com'
-
-
+    max_word_len = 10
+    size = size * max_word_len
     make_html(url)
     book = make_html(url).find('table', class_='layout2-blue').find_all('td',
                                                                     class_='layout2-blue')  # получили все книги на странице
