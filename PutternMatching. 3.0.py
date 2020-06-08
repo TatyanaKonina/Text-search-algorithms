@@ -3,10 +3,9 @@ import requests
 import random
 from bs4 import BeautifulSoup
 from PyQt5.QtWidgets import *
-from PyQt5 import QtGui
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 import ctypes as ct
-from functools import partial
 
 
 path1=b'C:\Users\Polina\\repos\\text-search-algorithms\str.txt'
@@ -15,29 +14,8 @@ path2=b'C:\Users\Polina\\repos\\text-search-algorithms\\vocabular.txt'
 path = r"C:\Users\Polina\source\repos\dll\Debug\dll.dll"  # or full path
 lib = ct.CDLL(path)
 encoding = 'utf-8'
-#global text
-# --------------- define c structs ------------------------------------------
-# def PushOK(self,countLine, comboBox, path1, enterWordEdit, sizeLine, sourceText):
-#     #textCombobox.clear()
-#     #textComboboxAl.clear()
-#     #textComboboxRes.clear()
-#     print( countLine.text())
-#     countText=countLine.text()
-#     a = int(countText)
-#     for i in range(a):
-#         textCombobox.addItem("Text " + str(i + 1))
-#         textComboboxAl.addItem("Text " + str(i + 1))
-#         textComboboxRes.addItem("Text " + str(i + 1))
-#
-#     pattern=enterWordEdit.text()
-#     c_pattern=ct.c_char_p(pattern.encode(encoding))
-#     text_num=a
-#     text_type=1
-#     puttern_num=5
-#     len=int(sizeLine.text())
-#     #global text
-#     text=(lib.make_text_storage(text_num, text_type, path2, c_pattern, puttern_num, len))
-#     print(text[0].Text.contents.haystack.decode(encoding))
+#--------- ------------------------------------------
+
 def log_uncaught_exceptions(ex_cls, ex, tb):
     text = '{}: {}:\n'.format(ex_cls.__name__, ex)
     import traceback
@@ -47,13 +25,10 @@ def log_uncaught_exceptions(ex_cls, ex, tb):
     QMessageBox.critical(None, 'Error', text)
     quit()
 
-
-import sys
-
 sys.excepthook = log_uncaught_exceptions
 def make_html(url):
     return BeautifulSoup(requests.get(url).content, 'lxml')
-
+#-----------------------------parser------------------------------
 def book_parser ():
     s =""
     url = 'http://www.loyalbooks.com/Top_100'
@@ -91,8 +66,7 @@ def book_parser ():
         i = random.randint(0, 50)
 
 
-
-
+# --------------- define c structs ------------------------------------------
 
 class Text (ct.Structure):
     _fields_ = [("haystack", ct.c_char_p),
@@ -127,66 +101,63 @@ lib.make_statictic.restype = ct.POINTER(SearchResult)
 
 lib.make_parser_storage.argtype = [(ct.c_char_p),ct.c_char_p,ct.c_int,ct.c_int]
 lib.make_parser_storage.restype = ct.POINTER(SearchRequest)
-#class PushOK(countLine, comboBox, path1, enterWordEdit, sizeLine, sourceText):
 
-
-
-
+#---------------------tabs--------------------------
 
 class Tab(QDialog):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("myproj")
+        self.setWindowTitle("Pattern Matching")
         self.resize(900, 600)
+        tabWidget = QTabWidget()
+        tabWidget.setTabPosition(QTabWidget.South)
 
         vbox=QVBoxLayout()
-        tabWidget=QTabWidget()
-        tabWidget.setTabPosition(QTabWidget.South)
 
         tabWidget.addTab(TextGeneration(), "Text Generation")
         vbox.addWidget(tabWidget)
         self.setLayout(vbox)
 
-       # tabWidget.addTab(FindWord(), "Algorithms")
         tabWidget.addTab(Result(), "Result")
-
         vbox.addWidget(tabWidget)
         self.setLayout(vbox)
-#обработка нажатия на текстовое поле
+
+#---------------обработка нажатия на текстовое поле-----------------
 class cQLineEdit(QLineEdit):
     clicked= pyqtSignal()
     def __init__(self,widget):
         super().__init__(widget)
     def mousePressEvent(self,QMouseEvent):
         self.clicked.emit()
-
+#------------------tab "TextGeneration--------------------------
 class TextGeneration(QWidget):
 
     def __init__(self):
         super().__init__()
 
-        label=QLabel("Text Generation")
-        label.setFont(QtGui.QFont("Calibri", 8))
+        label=QLabel("Text Generation", alignment=QtCore.Qt.AlignCenter)
+        label.setStyleSheet("""
+        font: bold""")
 
-        #global comboBox
         self.comboBox = QComboBox()
         self.comboBox.addItems(["Full Random", "Random words", "Text"])
         self.comboBox.currentTextChanged.connect(self.FormatSize)
 
         onlyNum = QtGui.QIntValidator(0, 10000)
 
-        #global sizeLine
+
         self.sizeLine=cQLineEdit(self)
         self.sizeLine.setValidator(onlyNum)
         self.sizeLine.clicked.connect(self.printText)
         self.sizeLine.setText('Number of words')
 
-        # global countLine
         self.countLine = QLineEdit()
         self.countLine.setValidator(onlyNum)
 
-        labelSourceText = QLabel("SourceText")
+        labelSourceText = QLabel("SourceText",alignment=QtCore.Qt.AlignCenter)
+        labelSourceText.setStyleSheet("""
+        font: bold""")
 
         self.sourceText=QTextEdit()
 
@@ -198,15 +169,18 @@ class TextGeneration(QWidget):
 
         buttonOk=QPushButton("OK")
         settingWordCombobox.currentTextChanged.connect(self.SetWord)
-        algorithmsLabel = QLabel("Algorithm")
-        setWordLabel=QLabel("Algorothms Settings:")
+        setWordLabel=QLabel("Algorothms Settings", alignment=QtCore.Qt.AlignCenter)
+        setWordLabel.setStyleSheet("""
+                font: bold""")
 
 
         self.algorithmCombobox = QComboBox()
         self.algorithmCombobox.addItems(
-            ["Naive Matcher", "Rabin Karp", "Boyer Moor Horspool", "KMP", "Ukkornen's algorithm"])
+            ["Naive Matcher", "Rabin Karp", "Boyer Moor Horspool", "KMP"])
 
-        putternSettings=QLabel("Puttern Settings:")
+        putternSettings=QLabel("Pattern Settings", alignment=QtCore.Qt.AlignCenter)
+        putternSettings.setStyleSheet("""
+        font: bold""")
         self.numberPuttern=cQLineEdit(self)
 
         self.numberPuttern.setStyleSheet("""
@@ -222,22 +196,9 @@ class TextGeneration(QWidget):
         sourceTextAlg = QTextEdit()
         sourceTextAlg.setReadOnly(True)
         buttonOk.clicked.connect(self.PushOK)
-              # setWordLabel = QLabel("Setting Word")
 
-
-
-        #labelSourceText = QLabel("SourceText")
-
-        # global textComboboxAl         #комбобокс из
-        # textComboboxAl = QComboBox()
-
-        # sourceText = QTextEdit()
-        # sourceText.append('nldksa')
         self.sourceText.setReadOnly(True)
 
-
-#расположение виджетов на вкладке Text Generation
-       #self global fbox2
         self.fbox2=QFormLayout()
         gbox=QGridLayout()
         fbox1=QFormLayout()
@@ -251,14 +212,14 @@ class TextGeneration(QWidget):
 
         self.fbox2.addRow(self.algorithmCombobox)
         self.fbox2.addRow(putternSettings)
-        self.fbox2.addRow("Number of putterns", self.numberPuttern)
+        self.fbox2.addRow("Number of patterns", self.numberPuttern)
         self.fbox2.addRow(settingWordCombobox)
         vbox.addLayout(self.fbox2)
 
 
         self.fbox2.addRow("Search word: ", self.enterWordEdit)
         vbox.addWidget(buttonOk)
-        #vbox.addLayout(fbox2)
+
         fbox1.addRow(labelSourceText)
         fbox1.addRow(textCombobox)
         fbox1.addRow(self.sourceText)
@@ -277,14 +238,16 @@ class TextGeneration(QWidget):
         if settingWordCombobox.currentText() == "Generate":
             self.randomCombobox = QComboBox()
             self.randomCombobox.addItems(["Full random", "Random word"])
-            # textCombobox.currentTextChanged.connect(self.EnterPattern)# отсюда вызывать фуннкцию генерации слов
             self.fbox2.addRow(self.randomCombobox)
+
+
+#----------------------------press the button OK--------------------------------
+
 
     def PushOK(self):
         if self.sizeLine.text=='number of words' or self.sizeLine.text()=='number of symbols' or self.countLine.text()=='' or self.numberPuttern.text()=='' or self.enterWordEdit.text()=='':
             return
         textCombobox.clear()
-        #textComboboxAl.clear()
         textComboboxRes.clear()
         self.sourceText.clear()
         self.sourceText.clear()
@@ -294,12 +257,8 @@ class TextGeneration(QWidget):
         a = int(countText)
         for i in range(a):
             textCombobox.addItem("Text " + str(i + 1))
-            #textComboboxAl.addItem("Text " + str(i + 1))
             textComboboxRes.addItem("Text " + str(i + 1))
-        # if settingWordCombobox.currentText() == "Generate":
-        #     if self.randomCombobox.currentText()=="Full random":
-        #
-        # b=0
+
         text_num = a
         puttern_num=0
         if self.comboBox.currentText()=="Random words":
@@ -317,7 +276,6 @@ class TextGeneration(QWidget):
             for i in range(text_num):
                 print((self.text[i].Text.contents.haystack).decode('utf-8'))
 
-        #self.sourceText.append("")
         else:
             text_num = a
             text_type = 0
@@ -369,7 +327,6 @@ class TextGeneration(QWidget):
 
 
 
-       # return self.text
 
 
     def ChooseText(self):
@@ -511,16 +468,20 @@ class Result(QWidget):
         global memoryWaste
 
 
-        generalResultsLabel=QLabel("General results: ")
-        genNumberOfMatches = QLabel("Number of pattern: ")
-        genNumOfComparises = QLabel("Number of comparisons: ")
-        genNumOfExtraOps = QLabel("Number of extra operations: ")
-        genMemoryWaste = QLabel("Memory waste: ")
-        resultsLabel=QLabel("Current text result: ")
-        numberOfMatches=QLabel("Number of pattern: ")
-        numOfComparises=QLabel("Number of comparisons: ")
-        numOfExtraOps=QLabel("Number of extra operations: ")
-        memoryWaste=QLabel("Memory waste: ")
+        generalResultsLabel=QLabel("General results", alignment=QtCore.Qt.AlignCenter)
+        generalResultsLabel.setStyleSheet("""
+        font: bold""")
+        genNumberOfMatches = QLabel("Number of pattern: -")
+        genNumOfComparises = QLabel("Number of comparisons: -")
+        genNumOfExtraOps = QLabel("Number of extra operations: -")
+        genMemoryWaste = QLabel("Memory waste: -")
+        resultsLabel=QLabel("Current text result", alignment=QtCore.Qt.AlignCenter)
+        resultsLabel.setStyleSheet("""
+        font: bold""")
+        numberOfMatches=QLabel("Number of pattern: -")
+        numOfComparises=QLabel("Number of comparisons: -")
+        numOfExtraOps=QLabel("Number of extra operations: -")
+        memoryWaste=QLabel("Memory waste: -")
 
         fbox1=QFormLayout()
         fbox2=QFormLayout()
@@ -538,17 +499,13 @@ class Result(QWidget):
         fbox2.addWidget(numOfExtraOps)
         fbox2.addWidget(memoryWaste)
 
-       # fbox.addWidget(matchedShifts)
         gbox.setColumnStretch(1,0)
         gbox.addLayout(fbox1, 0,0)
         gbox.addLayout(fbox2, 0, 1)
         self.setLayout(gbox)
 
-
-
-
 if __name__ == '__main__':
-    app = QApplication(sys.argv)   #создание объекта класса QApplication
+    app = QApplication(sys.argv) #создание объекта класса QApplication
     tabDialog=Tab()
     tabDialog.show()
     sys.exit(app.exec_())
