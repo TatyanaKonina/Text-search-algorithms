@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import random
+import re
 
 def make_html(url):
     return BeautifulSoup(requests.get(url).content, 'lxml')
@@ -18,7 +19,6 @@ def book_parser (size):
 
     while (s == ""):
         if  (len(book) - 1 > i) & (book[i].find('a') != -1):
-            print(book[i].find('a'))
             book_link = book[i].find('a')# первая ссылка
             if(book_link != None):
                 book_link = book[i].find('a').get('href')
@@ -39,6 +39,5 @@ def book_parser (size):
                             break
                         s = s + p.text
                         s = " ".join(re.split("\s+", s, flags=re.UNICODE))
-                    print(s)
                     return s
         i = random.randint(0, 99)
