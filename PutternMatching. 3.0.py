@@ -11,7 +11,7 @@ import ctypes as ct
 path1=b'C:\Users\Polina\\repos\\text-search-algorithms\str.txt'
 path2=b'C:\Users\Polina\\repos\\text-search-algorithms\\vocabular.txt'
 # #---------------------path to dll-------------------------------------
-path = r"C:\Users\Polina\source\repos\dll\Debug\dll.dll"  # or full path
+path = r"C:\Users\Polina\source\repos\dll2\Debug\dll2.dll"  # or full path
 lib = ct.CDLL(path)
 encoding = 'utf-8'
 #--------- ------------------------------------------
@@ -144,7 +144,7 @@ class TextGeneration(QWidget):
         self.comboBox.addItems(["Full Random", "Random words", "Text"])
         self.comboBox.currentTextChanged.connect(self.FormatSize)
 
-        onlyNum = QtGui.QIntValidator(0, 10000)
+        onlyNum = QtGui.QIntValidator(1, 10000)
 
 
         self.sizeLine=cQLineEdit(self)
@@ -161,14 +161,14 @@ class TextGeneration(QWidget):
 
         self.sourceText=QTextEdit()
 
-        global textCombobox
-        textCombobox=QComboBox()
-        global settingWordCombobox
-        settingWordCombobox = QComboBox()
-        settingWordCombobox.addItems(["Manual", "Generate"])
+
+        self.textCombobox=QComboBox()
+        self.settingWordCombobox = QComboBox()
+        self.settingWordCombobox.addItems(["Manual", "Generate"])
 
         buttonOk=QPushButton("OK")
-        settingWordCombobox.currentTextChanged.connect(self.SetWord)
+        buttonClear=QPushButton("Clear")
+        self.settingWordCombobox.currentTextChanged.connect(self.SetWord)
         setWordLabel=QLabel("Algorothms Settings", alignment=QtCore.Qt.AlignCenter)
         setWordLabel.setStyleSheet("""
                 font: bold""")
@@ -183,11 +183,11 @@ class TextGeneration(QWidget):
         font: bold""")
         self.numberPuttern=cQLineEdit(self)
 
+
         self.numberPuttern.setStyleSheet("""
                         color: gray;
                         font: italic""")
         self.numberPuttern.setText("only for random words")
-        self.numberPuttern.setValidator(onlyNum)
 
 
         self.enterWordEdit = cQLineEdit(self)
@@ -196,8 +196,10 @@ class TextGeneration(QWidget):
         sourceTextAlg = QTextEdit()
         sourceTextAlg.setReadOnly(True)
         buttonOk.clicked.connect(self.PushOK)
+        buttonClear.clicked.connect(self.Clear)
 
         self.sourceText.setReadOnly(True)
+
 
         self.fbox2=QFormLayout()
         gbox=QGridLayout()
@@ -209,19 +211,19 @@ class TextGeneration(QWidget):
         self.fbox2.addRow("Size of text: ", self.sizeLine)
         self.fbox2.addRow("Text count:    ", self.countLine)
         self.fbox2.addRow(setWordLabel)
-
         self.fbox2.addRow(self.algorithmCombobox)
         self.fbox2.addRow(putternSettings)
         self.fbox2.addRow("Number of patterns", self.numberPuttern)
-        self.fbox2.addRow(settingWordCombobox)
+        self.fbox2.addRow(self.settingWordCombobox)
         vbox.addLayout(self.fbox2)
 
-
         self.fbox2.addRow("Search word: ", self.enterWordEdit)
+
         vbox.addWidget(buttonOk)
+        vbox.addWidget(buttonClear)
 
         fbox1.addRow(labelSourceText)
-        fbox1.addRow(textCombobox)
+        fbox1.addRow(self.textCombobox)
         fbox1.addRow(self.sourceText)
         gbox.setColumnStretch(1,1)
         gbox.addLayout(vbox,0,0)
@@ -233,39 +235,52 @@ class TextGeneration(QWidget):
         font: italic""")
         self.sizeLine.setText("number of symbols")
 
+
+
+
     def SetWord(self):
-        self.fbox2.removeRow(10)
-        if settingWordCombobox.currentText() == "Generate":
-            self.randomCombobox = QComboBox()
-            self.randomCombobox.addItems(["Full random", "Random word"])
-            self.fbox2.addRow(self.randomCombobox)
+        if self.settingWordCombobox.currentText() == "Generate":
+            self.enterWordEdit.setStyleSheet("""
+        color: gray;
+        font: italic""")
+            self.enterWordEdit.setReadOnly(True)
+            self.enterWordEdit.setText("random word")
+        else:
+            self.enterWordEdit.clear()
+            self.enterWordEdit.setReadOnly(False)
+            self.enterWordEdit.setStyleSheet("""
+                    color: black;
+                    font: normal""")
 
+        
 
-#----------------------------press the button OK--------------------------------
+# ----------------------------press the button OK--------------------------------
 
 
     def PushOK(self):
-        if self.sizeLine.text=='number of words' or self.sizeLine.text()=='number of symbols' or self.countLine.text()=='' or self.numberPuttern.text()=='' or self.enterWordEdit.text()=='':
-            return
-        textCombobox.clear()
+        if self.sizeLine.text=='number of words' or self.sizeLine.text()=='number of symbols' or self.countLine.text()=='' or self.numberPuttern.text()=='':
+           return
+        self.textCombobox.clear()
         textComboboxRes.clear()
         self.sourceText.clear()
-        self.sourceText.clear()
-        self.sourceText.clear()
+        # self.sourceText.clear()
+        # self.sourceText.clear()
         resulText.clear()
         countText = self.countLine.text()
         a = int(countText)
         for i in range(a):
-            textCombobox.addItem("Text " + str(i + 1))
+            self.textCombobox.addItem("Text " + str(i + 1))
             textComboboxRes.addItem("Text " + str(i + 1))
-
         text_num = a
         puttern_num=0
         if self.comboBox.currentText()=="Random words":
             puttern_num=self.numberPuttern.text()
-        pattern = self.enterWordEdit.text()
-        c_pattern = ct.c_char_p(pattern.encode(encoding))
-        #self.text=0
+        if self.settingWordCombobox.currentText()=="Manual":
+            self.pattern = self.enterWordEdit.text()
+            c_pattern = ct.c_char_p(self.pattern.encode(encoding))
+        else:
+            c_pattern=0
+
         if self.comboBox.currentText() == "Text":
 
             list_ = []
@@ -273,9 +288,6 @@ class TextGeneration(QWidget):
                 list_.append(book_parser())
                 new_list = (ct.c_char_p * text_num)(*map(str.encode, list_))
             self.text=lib.make_parser_storage(new_list, c_pattern, text_num, len)
-            for i in range(text_num):
-                print((self.text[i].Text.contents.haystack).decode('utf-8'))
-
         else:
             text_num = a
             text_type = 0
@@ -291,37 +303,94 @@ class TextGeneration(QWidget):
                 puttern_num = self.numberPuttern.text()
 
             puttern_num=int(puttern_num)
-            len = int(self.sizeLine.text())
-            self.text = (lib.make_text_storage(text_num, text_type, path, c_pattern, puttern_num, len))
+            length = int(self.sizeLine.text())
+            print(length)
+            if self.settingWordCombobox.currentText() == "Generate":
+                self.text = (lib.make_text_storage(text_num, text_type, path, 0, puttern_num, length))
+            else:
+                self.text = (lib.make_text_storage(text_num, text_type, path, c_pattern, puttern_num, length))
+        textik=self.text[0].Text.contents.haystack.decode(encoding)
         self.sourceText.append(self.text[0].Text.contents.haystack.decode(encoding))
-
-        resulText.append(self.text[0].Text.contents.haystack.decode(encoding))
-
+        if self.settingWordCombobox.currentText()=="Generate":
+            self.enterWordEdit.clear()
+            self.enterWordEdit.setStyleSheet("""font: normal; color: black""")
+            self.enterWordEdit.setText(self.text[0].Pattern.contents.needle.decode(encoding))
         numAlg=1
-        if self.algorithmCombobox.currentText=="Boyer Moor Horspool":
+        if self.algorithmCombobox.currentText()=="Boyer Moor Horspool":
             numAlg=0
-        elif self.algorithmCombobox.currentText=="Naive Matcher":
+        elif self.algorithmCombobox.currentText()=="Naive Matcher":
             numAlg=1
-        elif self.algorithmCombobox.currentText=="Rabin Karp":
+        elif self.algorithmCombobox.currentText()=="Rabin Karp":
             numAlg=2
-        elif self.algorithmCombobox.currentText=="KMP":
+        elif self.algorithmCombobox.currentText()=="KMP":
             numAlg=3
 
-        self.algorithm_res = lib.make_result_storage(self.text, numAlg , text_num)
+        self.algorithm_res = lib.make_result_storage(self.text, numAlg, text_num)
+        numPatrern=0
+        i=0
+        printRes=''
+        numPattern = 0
+        printRes = ''
+
+        text = self.text[0].Text.contents.haystack.decode(encoding)
+        i = 0
+        if self.comboBox.currentText() == "Random words":
+            if self.algorithm_res[0].numberOfMatches != 0:
+                while i < len(text):
+                    if i == self.algorithm_res[0].matchedShifts[numPattern]:
+                        for j in range(i,  len(self.text[0].Pattern.contents.needle.decode(encoding))+i):
+                            redText = "<span style=\" font: bold; color: #ffa500;\">"
+                            redText += (text[j])
+
+                            printRes += (redText)
+                        numPattern += 1
+                        i += len(self.text[0].Pattern.contents.needle.decode(encoding))
+                    else:
+                        blackText = "<span style=\" font: normal; color: black;\">"
+                        blackText += text[i]
+                        printRes += (blackText)
+                        i += 1
+                resulText.append(printRes)
+            else:
+                resulText.append(self.text[0].Text.contents.haystack.decode(encoding))
+        else:
+            if self.algorithm_res[0].numberOfMatches != 0:
+                while i < len(text):
+                    if i == self.algorithm_res[0].matchedShifts[numPattern]:
+                        if i+1==self.algorithm_res[0].matchedShifts[numPattern+1]:
+                            redText = "<span style=\" font: bold; color: #ffa500;\">"
+                            redText += (text[i])
+                            printRes += (redText)
+                            i+=1
+                        else:
+                            for j in range(i, i + len(self.text[0].Pattern.contents.needle.decode(encoding))):
+                                redText = "<span style=\" font: bold; color: #ffa500;\">"
+                                redText += (text[j])
+                                printRes += (redText)
+                            i+=len(self.text[0].Pattern.contents.needle.decode(encoding))
+                        numPattern += 1
+                    else:
+                        blackText = "<span style=\" font: normal; color: black;\">"
+                        blackText += text[i]
+                        printRes += (blackText)
+                        i += 1
+                resulText.append(printRes)
+            else:
+                resulText.append(self.text[0].Text.contents.haystack.decode(encoding))
 
         statictic = lib.make_statictic(self.algorithm_res, text_num)
 
         numberOfMatches.setText("Number of matches: " + str(self.algorithm_res[0].numberOfMatches))
         numOfComparises.setText("Number of comparisons: " + str(self.algorithm_res[0].numOfCompares))
         numOfExtraOps.setText("Number of extra operations: " + str(self.algorithm_res[0].numOfExtraOps))
+        workTime.setText("Work time: " + str(self.algorithm_res[0].workTime))
         memoryWaste.setText("Memory waste: " + str(self.algorithm_res[0].memoryWaste))
-        genNumberOfMatches.setText("Number of matches: " + str(statictic.contents.numberOfMatches))
-
+        genPattern.setText("Pattern: "+ self.enterWordEdit.text())
         genNumOfComparises.setText("Number of comparisons: " + str(statictic.contents.numOfCompares))
         genNumOfExtraOps.setText("Number of extra operations: " + str(statictic.contents.numOfExtraOps))
+        genWorkTime.setText("Work time: " + str(statictic.contents.workTime))
         genMemoryWaste.setText("Memory waste: " + str(statictic.contents.memoryWaste))
-        #print(statictic.contents.numberOfMatches)
-        textCombobox.currentTextChanged.connect(self.ChooseText)
+        self.textCombobox.currentTextChanged.connect(self.ChooseText)
         textComboboxRes.currentTextChanged.connect(self.ChooseTextRes)
 
 
@@ -331,10 +400,7 @@ class TextGeneration(QWidget):
 
     def ChooseText(self):
         self.sourceText.clear()
-        #self.sourceText.clear()
-
-        b = textCombobox.currentText()
-        print(len(b))
+        b = self.textCombobox.currentText()
         if b=='':
             return
         c = ''
@@ -353,11 +419,85 @@ class TextGeneration(QWidget):
         for i in range(5, len(b)):
             c += b[i]
         h=int(c)-1
-        resulText.append(self.text[h].Text.contents.haystack.decode(encoding))
         numberOfMatches.setText("Number of matches: " + str(self.algorithm_res[h].numberOfMatches))
         numOfComparises.setText("Number of comparisons: " + str(self.algorithm_res[h].numOfCompares))
         numOfExtraOps.setText("Number of extra operations: " + str(self.algorithm_res[h].numOfExtraOps))
+        workTime.setText("Work time: "+ str(self.algorithm_res[h].workTime))
         memoryWaste.setText("Memory waste: " + str(self.algorithm_res[h].memoryWaste))
+        numPattern=0
+        printRes = ''
+        text=self.text[h].Text.contents.haystack.decode(encoding)
+        i=0
+        if self.comboBox.currentText() == "Random words":
+            if self.algorithm_res[h].numberOfMatches != 0:
+                while i < len(text):
+                    if i == self.algorithm_res[h].matchedShifts[numPattern]:
+                        for j in range(i,  len(self.text[h].Pattern.contents.needle.decode(encoding))+i):
+                            redText = "<span style=\" font: bold; color: #ffa500;\">"
+                            redText += (text[j])
+
+                            printRes += (redText)
+                        numPattern += 1
+                        i += len(self.text[h].Pattern.contents.needle.decode(encoding))
+                    else:
+                        blackText = "<span style=\" font: normal; color: black;\">"
+                        blackText += text[i]
+                        printRes += (blackText)
+                        i += 1
+                resulText.append(printRes)
+            else:
+                resulText.append(self.text[h].Text.contents.haystack.decode(encoding))
+        else:
+            if self.algorithm_res[h].numberOfMatches != 0:
+                while i < len(text):
+                    if i == self.algorithm_res[h].matchedShifts[numPattern]:
+                        if i+1==self.algorithm_res[h].matchedShifts[numPattern+1]:
+                            redText = "<span style=\" font: bold; color: #ffa500;\">"
+                            redText += (text[i])
+                            printRes += (redText)
+                            i+=1
+                        else:
+                            for j in range(i, i + len(self.text[h].Pattern.contents.needle.decode(encoding))):
+                                redText = "<span style=\" font: bold; color: #ffa500;\">"
+                                redText += (text[j])
+                                printRes += (redText)
+                            i+=len(self.text[h].Pattern.contents.needle.decode(encoding))
+                        numPattern += 1
+                    else:
+                        blackText = "<span style=\" font: normal; color: black;\">"
+                        blackText += text[i]
+                        printRes += (blackText)
+                        i += 1
+                resulText.append(printRes)
+            else:
+                resulText.append(self.text[h].Text.contents.haystack.decode(encoding))
+
+
+
+    def Clear(self):
+        self.comboBox.setCurrentText("Full Random")
+        self.countLine.clear()
+        self.algorithmCombobox.setCurrentText("Naive Matcher")
+        self.settingWordCombobox.setCurrentText('Manual')
+        self.numberPuttern.clear()
+        self.textCombobox.clear()
+        textComboboxRes.clear()
+        self.enterWordEdit.clear()
+        self.sourceText.clear()
+        resulText.clear()
+
+        genPattern.setText("Pattern: -")
+        genNumOfComparises.setText("Number of comparisons: -")
+        genNumOfExtraOps.setText("Number of extra operations: -")
+        genWorkTime.setText("Work time: -")
+        genMemoryWaste.setText("Memory waste: -")
+
+        numberOfMatches.setText("Number of pattern: -")
+        numOfComparises.setText("Number of comparisons: -")
+        numOfExtraOps.setText("Number of extra operations: -")
+        workTime.setText("Work time: -")
+        memoryWaste.setText("Memory waste: -")
+
 
 
     def FormatSize(self):
@@ -377,14 +517,14 @@ class TextGeneration(QWidget):
             self.numberPuttern.setReadOnly(False)
             self.numberPuttern.setStyleSheet("""
                            color: black;""")
-
-
-
         else:
             self.sizeLine.setText("number of words")
-        #self.setLayout(hbox)
+
+
+
     def ClearEditLine(self):
         self.sizeLine.clear()
+
 
 
     def printText(self):
@@ -393,62 +533,6 @@ class TextGeneration(QWidget):
                 color: black;
                 """)
 
-
-
-
-    # def EnterPattern(self):
-    #     if self.randomCombobox=="Full random":
-
-
-# class FindWord(QWidget):
-#     def __init__(self):
-#         super().__init__()
-#
-#         # algorithmsLabel=QLabel("Algorithm")
-#         #
-#         # algorithmCombobox=QComboBox()
-#         # algorithmCombobox.addItems(["Naive Matcher", "Rabin Karp", "Boyer Moor Horspool", "KMP", "Ukkornen's algorithm"])
-#
-#         labelSourceText = QLabel("SourceText")
-#
-#         global textComboboxAl
-#         textComboboxAl = QComboBox()
-#
-#
-#        # sourceText.append(text[0].Text.contents.haystack.decode(encoding))
-#
-#         global fbox
-#         fbox=QFormLayout()
-#         fbox1 = QFormLayout()
-#         gbox = QGridLayout()
-#         global vbox
-#         vbox=QVBoxLayout()
-#
-#         fbox.addRow(algorithmsLabel)
-#         fbox.addRow(algorithmCombobox)
-#        # fbox.addRow(setWordLabel)
-#         #
-#         fbox1.addRow(labelSourceText)
-#         fbox1.addRow(textComboboxAl)
-#         fbox1.addRow(sourceTextAlg)
-#        # settingWordCombobox.currentTextChanged.connect(self.SetWord)
-#         #enterWordEdit = QLineEdit()
-#         btnOKGen = QPushButton("ОК")
-#         #fbox.addRow("Search word: ", enterWordEdit)
-#         vbox.addLayout(fbox)
-#         vbox.addWidget(btnOKGen)
-#
-#
-#         gbox.setColumnStretch(1, 1)
-#         gbox.addLayout(vbox, 0, 0)
-#         gbox.addLayout(fbox1, 0, 1)
-#
-#         self.setLayout(gbox)
-
-
-
-
-
 class Result(QWidget):
     def __init__(self):
         super().__init__()
@@ -456,24 +540,25 @@ class Result(QWidget):
         textComboboxRes=QComboBox()
         global resulText
         resulText=QTextEdit()
-       # global matchedShifts
-        #matchedShifts=QLabel()
+        global genPattern
         global genNumberOfMatches
         global genNumOfComparises
         global genNumOfExtraOps
+        global genWorkTime
         global genMemoryWaste
         global numberOfMatches
         global numOfComparises
         global numOfExtraOps
+        global workTime
         global memoryWaste
-
 
         generalResultsLabel=QLabel("General results", alignment=QtCore.Qt.AlignCenter)
         generalResultsLabel.setStyleSheet("""
         font: bold""")
-        genNumberOfMatches = QLabel("Number of pattern: -")
+        genPattern = QLabel("Pattern: -")
         genNumOfComparises = QLabel("Number of comparisons: -")
         genNumOfExtraOps = QLabel("Number of extra operations: -")
+        genWorkTime=QLabel("Work time: -")
         genMemoryWaste = QLabel("Memory waste: -")
         resultsLabel=QLabel("Current text result", alignment=QtCore.Qt.AlignCenter)
         resultsLabel.setStyleSheet("""
@@ -481,15 +566,17 @@ class Result(QWidget):
         numberOfMatches=QLabel("Number of pattern: -")
         numOfComparises=QLabel("Number of comparisons: -")
         numOfExtraOps=QLabel("Number of extra operations: -")
+        workTime = QLabel("Work time: -")
         memoryWaste=QLabel("Memory waste: -")
 
         fbox1=QFormLayout()
         fbox2=QFormLayout()
         gbox=QGridLayout()
         fbox1.addWidget(generalResultsLabel)
-        fbox1.addWidget(genNumberOfMatches)
+        fbox1.addWidget(genPattern)
         fbox1.addWidget(genNumOfComparises)
         fbox1.addWidget(genNumOfExtraOps)
+        fbox1.addWidget(genWorkTime)
         fbox1.addWidget(genMemoryWaste)
         fbox2.addWidget(resultsLabel)
         fbox2.addWidget(textComboboxRes)
@@ -497,6 +584,7 @@ class Result(QWidget):
         fbox2.addWidget(numberOfMatches)
         fbox2.addWidget(numOfComparises)
         fbox2.addWidget(numOfExtraOps)
+        fbox2.addWidget(workTime)
         fbox2.addWidget(memoryWaste)
 
         gbox.setColumnStretch(1,0)
@@ -509,4 +597,3 @@ if __name__ == '__main__':
     tabDialog=Tab()
     tabDialog.show()
     sys.exit(app.exec_())
-    app = QtWidgets.QApplication(sys.argv)
