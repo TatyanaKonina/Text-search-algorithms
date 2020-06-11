@@ -229,15 +229,16 @@ SearchResult* knuthMorrisPrattMatcher(SearchRequest* request) {
 	while (i != request->text->haystackSize) {
 		while (j > 0 && request->pattern->needle[j] != request->text->haystack[i]) {
 			result->numOfCompares++;
-			j = prefix_mass[j - 1];
+			j = prefix_mass[j - 1];//сдвигаемся по массиву префикс функции
 		}
 		if (request->text->haystack[i] == request->pattern->needle[j]) {
+			// символы совпали, смещаемся вправо
 			result->numOfCompares++;
 			j++;
 		}
-		if (j == request->pattern->needleSize) {
+		if (j == request->pattern->needleSize) {//нашли образ
 			result->matchedShifts[result->numberOfMatches++] = i - request->pattern->needleSize + 1;
-
+			result->numOfExtraOps++;
 		}
 		i++;
 	}
