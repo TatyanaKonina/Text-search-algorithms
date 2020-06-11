@@ -379,12 +379,10 @@ char* text_compiling(char** data, int line_num, int patterns_num, char* pattern,
 		quick_sort(random_positions, 0, patterns_num - 1);//сортируем
 	}
 	for (int i = 0; i < words_num; i++) {
-		if ( patterns_num) {
-			if ((i == random_positions[pointer])) {
-				pointer++;               // если попали на               
-				strcat(text, pattern);   //рандомную позиция                      
-				strcat(text, " ");       // вставляем паттерн
-			}
+		if ( patterns_num && i == random_positions[pointer]) {
+			pointer++;               // если попали на               
+			strcat(text, pattern);   //рандомную позиция                      
+			strcat(text, " ");       // вставляем паттерн
 		}
 		else {
 			int r = rand() % line_num;
@@ -394,6 +392,7 @@ char* text_compiling(char** data, int line_num, int patterns_num, char* pattern,
 	if (patterns_num) {
 		free(random_positions);
 	}
+
 
 	return text;
 }
@@ -429,7 +428,7 @@ DLL_EXPORT SearchRequest* make_text_storage (int texts_num, int text_type, char*
         int line_num = words_num_in_file(file_in);
         char** data = read_data(file_in, line_num);
         if (pattern == NULL) {
-			pattern = text_compiling(data, line_num, NULL, NULL, NULL, one_word);
+			pattern = text_compiling(data, line_num, NULL, NULL, max_world_len, one_word);
 		}
         for (int i = 0; i < texts_num; i++) {
 			text = text_compiling(data, line_num, pattern_num, pattern, i, num);
