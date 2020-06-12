@@ -120,10 +120,13 @@ SearchResult* naiveStringMatcher(SearchRequest* request)
 	for (shift = 0; shift <= (request->text->haystackSize) - (request->pattern->needleSize); shift++) {
 		matched = 0;
 		for (i = 0; i < (request->pattern->needleSize); i++) {                        //
-			if (request->pattern->needle[i] == request->text->haystack[shift + i]) {  //
-				matched++;                                                            //может переделать цикл и дбавить в него if c break, чтобы лишних итераций не капало?
-			}																		  //
-			result->numOfCompares++;											      //
+			result->numOfCompares++;                       
+			if (request->pattern->needle[i] != request->text->haystack[shift + i]) {
+				i = request->pattern->needleSize;                                                            
+			}
+			else {
+				matched++;
+			}											      //
 		}																			  //
 		if (matched == request->pattern->needleSize) {
 			result->matchedShifts[result->numberOfMatches++] = shift;
@@ -162,10 +165,13 @@ SearchResult* rabinKarpMatcher(SearchRequest* request)
 		matched = 0;
 		if (patNumber == textNumber) {
 			for (i = 0; i < request->pattern->needleSize; i++) {                         //
-				if (request->pattern->needle[i] == request->text->haystack[shift + i]) { //
-					matched++;                                                           //может переделать цикл и дбавить в него if c break, чтобы лишних итераций не капало?
-					result->numOfCompares++;                                             //
-				}                                                                        //
+				result->numOfCompares++;                       
+				if (request->pattern->needle[i] != request->text->haystack[shift + i]) {
+					i = request->pattern->needleSize;                                                            
+				}
+				else {
+					matched++;
+				} //
 			}                                                                            //
 			if (matched == request->pattern->needleSize) {
 				result->matchedShifts[result->numberOfMatches++] = shift;
