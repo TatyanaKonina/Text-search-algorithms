@@ -460,7 +460,7 @@ void Init_Memory_Request(SearchRequest* storage, int text_type, char* pattern,ch
 	storage->text->haystackSize = strlen(text);
 }
 
-DLL_EXPORT SearchRequest* make_result_storage(SearchRequest* texts_storage, int algorithm_type, int texts_num) {
+DLL_EXPORT SearchResult* make_result_storage(SearchRequest* texts_storage, int algorithm_type, int texts_num) {
 	
     // прогоняет алгоритмы на всех текстах (на вход масссив тестов)
     //возвращает массив searchReasult
