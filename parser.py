@@ -7,6 +7,9 @@ def make_html(url):
     return BeautifulSoup(requests.get(url).content, 'lxml')
 
 def book_parser (size):
+    books_num = 99
+    book_box =4
+    link_box = 2
     s =""
     url = 'http://www.loyalbooks.com/Top_100/'
     main_link = 'http://www.loyalbooks.com'
@@ -15,7 +18,7 @@ def book_parser (size):
     make_html(url)
     book = make_html(url).find('table', class_='layout2-blue').find_all('td',
                                                                     class_='layout2-blue')  # получили все книги на странице
-    i = random.randint(0,50)
+    i = random.randint(0,books_num)
 
     while (s == ""):
         if  (len(book) - 1 > i) & (book[i].find('a') != -1):
@@ -26,9 +29,9 @@ def book_parser (size):
                 link = main_link + book_link
                 page_book_html = make_html(link)  # перешли на страницу книги
                 if len(page_book_html.find_all('table',
-                                       class_='book')) > 4:  # проверка на случай если на сайте нет онлайн версии
+                                       class_='book')) >book_box:  # проверка на случай если на сайте нет онлайн версии
                     author = page_book_html.find('font', class_='book-author').text  # нашли автора
-                    e_book_link = page_book_html.find_all('table', class_='book')[4].find_all('td', class_='book2')[2].find(
+                    e_book_link = page_book_html.find_all('table', class_='book')[book_box].find_all('td', class_='book2')[link_box].find(
                     'a').get('href')
             # нашли ссылку на которой онлайн книга
                     page_book_txt = make_html(e_book_link)
@@ -40,4 +43,4 @@ def book_parser (size):
                         s = s + p.text
                         s = " ".join(re.split("\s+", s, flags=re.UNICODE))
                     return s
-        i = random.randint(0, 99)
+        i = random.randint(0, books_num)
