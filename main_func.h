@@ -58,7 +58,7 @@ DLL_EXPORT SearchRequest* make_text_storage(int texts_num, int text_type, char* 
 
 void Init_Memory_Request(SearchRequest* storage, int text_type, char* pattern, char * text);
 
-DLL_EXPORT SearchRequest* make_result_storage(SearchRequest* texts_storage, int algorithm_type, int texts_num);
+DLL_EXPORT SearchResult* make_result_storage(SearchRequest* texts_storage, int algorithm_type, int texts_num);
 
 DLL_EXPORT SearchResult* make_statictic(SearchResult* result_storage, int texts_num);
 
